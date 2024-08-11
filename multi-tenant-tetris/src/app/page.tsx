@@ -1,13 +1,26 @@
+"use client";
+import { useState } from "react";
+
 const HEIGHT = 20;
 const WIDTH = 10;
 
-const tetrisField = () => {
-  const rowBlocks = Array.from({ length: WIDTH }, (_, i) => (
-    <div key={i} className="w-8 h-8 bg-[#1d2731] border border-[#1d2731]"></div>
-  ));
-  const blocks = Array.from({ length: HEIGHT }, (_, i) => (
-    <div key={i} className="flex justify-center">
-      {rowBlocks}
+type Address = {
+  x: number;
+  y: number;
+}
+
+const tetrisField = (existBlock: Address) => {
+  const rowBlocks = (y: number) => {
+    return Array.from({ length: WIDTH }, (_, x) => {
+      if (existBlock.x === x && existBlock.y === y) {
+        return <div key={'x-' + x} className="w-8 h-8 bg-[#4881C6] border border-[#1d2731]"></div>;
+      }
+      return <div key={'x-' + x} className="w-8 h-8 bg-[#1d2731] border border-[#1d2731]"></div>;
+    });
+  };
+  const blocks = Array.from({ length: HEIGHT }, (_, y) => (
+    <div key={'y-' + y} className="flex justify-center">
+      {rowBlocks(y)}
     </div>
   ));
 
@@ -19,10 +32,21 @@ const tetrisField = () => {
 }
 
 export default function Home() {
+
+  const [address, setAddress] = useState<Address>({ x: 4, y: 0 });
+
+  setInterval(() => {
+    if (address.y === HEIGHT - 1) {
+      setAddress((prev) => ({ ...prev, y: 0 }));
+      return;
+    }
+    setAddress((prev) => ({ ...prev, y: prev.y + 1 }));
+  }, 1000);
+
   return (
     <main className="min-h-screen p-12">
       <div className="p-12 w-full flex justify-center">
-        {tetrisField()}
+        {tetrisField(address)}
       </div>
     </main>
   );
