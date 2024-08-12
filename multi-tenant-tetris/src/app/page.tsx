@@ -55,8 +55,7 @@ export default function Home() {
           return row.map((block, x) => {
             if (x == addressRef.current.x && y == addressRef.current.y) {
               return true;
-            }
-            else if (x == addressRef.current.x && y == addressRef.current.y - 1) {
+            } else if (x == addressRef.current.x && y == addressRef.current.y - 1 && y < HEIGHT - 1) {
               return false;
             }
             return block;
@@ -66,7 +65,7 @@ export default function Home() {
       }
       );
 
-    }, 1000);
+    }, 100);
     return () => clearInterval(interval); // クリーンアップ関数でタイマーをクリア
   }, []);
 
