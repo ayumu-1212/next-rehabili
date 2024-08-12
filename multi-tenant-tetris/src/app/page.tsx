@@ -36,26 +36,33 @@ export default function Home() {
   const [existBlocks, setExistBlocks] = useState<Boolean[][]>(Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => false)));
 
   const addressRef = useRef(address);
+  const existBlocksRef = useRef(existBlocks);
 
   useEffect(() => {
     addressRef.current = address;
   }, [address]);
-
+  useEffect(() => {
+    existBlocksRef.current = existBlocks;
+  }, [existBlocks]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setAddress((prev) => {
-        if (prev.y > HEIGHT - 1) {
+        if (prev.y == HEIGHT - 1 || existBlocksRef.current[prev.y + 1][prev.x]) {
           return { ...prev, y: 0 };
         }
-        return { ...prev, y: prev.y + 1 };
+
+        if (prev.y == HEIGHT - 1 || prev.y < HEIGHT - 1 && !existBlocksRef.current[prev.y + 1][prev.x]) {
+          return { ...prev, y: prev.y + 1 };
+        }
+        return prev;
       });
       setExistBlocks((prev) => {
         const newBlocks = prev.map((row, y) => {
           return row.map((block, x) => {
             if (x == addressRef.current.x && y == addressRef.current.y) {
               return true;
-            } else if (x == addressRef.current.x && y == addressRef.current.y - 1 && y < HEIGHT - 1) {
+            } else if (x == addressRef.current.x && y == addressRef.current.y - 1 && y < HEIGHT - 1 && !prev[y + 1][x]) {
               return false;
             }
             return block;
@@ -65,7 +72,7 @@ export default function Home() {
       }
       );
 
-    }, 100);
+    }, 300);
     return () => clearInterval(interval); // クリーンアップ関数でタイマーをクリア
   }, []);
 
