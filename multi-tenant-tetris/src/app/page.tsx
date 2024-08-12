@@ -12,54 +12,74 @@ type Address = {
 
 export default function Home() {
   const [address, setAddress] = useState<Address>({ x: 4, y: 0 });
-  const [existBlocks, setExistBlocks] = useState<Boolean[][]>(Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => false)));
+  const [placedBlocks, setPlacedBlocks] = useState<Boolean[][]>(Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => false)));
 
   const addressRef = useRef(address);
-  const existBlocksRef = useRef(existBlocks);
+  const placedBlocksRef = useRef(placedBlocks);
 
   useEffect(() => {
     addressRef.current = address;
   }, [address]);
   useEffect(() => {
-    existBlocksRef.current = existBlocks;
-  }, [existBlocks]);
+    placedBlocksRef.current = placedBlocks;
+    console.log(placedBlocksRef.current);
+  }, [placedBlocks]);
 
   useEffect(() => {
     const interval = setInterval(() => {
+      if (addressRef.current.y >= HEIGHT - 1 || placedBlocksRef.current[addressRef.current.y + 1][addressRef.current.x]) {
+        setPlacedBlocks((prev) => {
+          const newBlocks = prev.map((row, y) => {
+            return row.map((block, x) => {
+              if (x == addressRef.current.x && y == addressRef.current.y) {
+                return true;
+              }
+              return block;
+            });
+          });
+          return newBlocks;
+        });
+      }
       setAddress((prev) => {
-        if (prev.y == HEIGHT - 1 || existBlocksRef.current[prev.y + 1][prev.x]) {
+        if (prev.y >= HEIGHT - 1 || placedBlocksRef.current[prev.y + 1][prev.x]) {
           return { ...prev, y: 0 };
         }
-
-        if (prev.y == HEIGHT - 1 || prev.y < HEIGHT - 1 && !existBlocksRef.current[prev.y + 1][prev.x]) {
-          return { ...prev, y: prev.y + 1 };
-        }
-        return prev;
+        return { ...prev, y: prev.y + 1 };
       });
-      setExistBlocks((prev) => {
-        const newBlocks = prev.map((row, y) => {
-          return row.map((block, x) => {
-            if (x == addressRef.current.x && y == addressRef.current.y) {
-              return true;
-            } else if (x == addressRef.current.x && y == addressRef.current.y - 1 && y < HEIGHT - 1 && !prev[y + 1][x]) {
-              return false;
-            }
-            return block;
-          });
-        });
-        return newBlocks;
-      }
-      );
-
     }, 300);
     return () => clearInterval(interval); // クリーンアップ関数でタイマーをクリア
   }, []);
 
+  const keyDownHandler = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const key = e.code;
 
+    if (key === 'ArrowUp') {
+      console.log('key is ArrowUp');
+    }
+
+    if (key === 'ArrowDown') {
+      console.log('key is ArrowDown');
+    }
+
+    if (key === 'ArrowLeft') {
+      setAddress((address) =>
+        address.x > 0 && !placedBlocksRef.current[address.y][address.x - 1] ? { ...address, x: address.x - 1 } : address
+      );
+    }
+
+    if (key === 'ArrowRight') {
+      setAddress((address) =>
+        address.x < WIDTH - 1 && !placedBlocksRef.current[address.y][address.x + 1] ? { ...address, x: address.x + 1 } : address
+      );
+    }
+  }
+
+  const existBlocks = placedBlocksRef.current.map(v => v.map(v2 => v2));
+  existBlocks[addressRef.current.y][addressRef.current.x] = true;
 
   return (
     <main className="min-h-screen p-12">
-      <div className="p-12 w-full flex justify-center">
+      <div className="p-12 w-full flex justify-center" tabIndex={0} onKeyDown={keyDownHandler}>
         {TetrisField(existBlocks)}
       </div>
     </main>
