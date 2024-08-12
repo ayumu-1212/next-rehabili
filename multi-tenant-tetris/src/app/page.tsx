@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const HEIGHT = 20;
 const WIDTH = 10;
@@ -35,13 +35,18 @@ export default function Home() {
 
   const [address, setAddress] = useState<Address>({ x: 4, y: 0 });
 
-  setInterval(() => {
-    if (address.y === HEIGHT - 1) {
-      setAddress((prev) => ({ ...prev, y: 0 }));
-      return;
-    }
-    setAddress((prev) => ({ ...prev, y: prev.y + 1 }));
-  }, 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAddress((prev) => {
+        if (prev.y > HEIGHT - 1) {
+          return { ...prev, y: 0 };
+        }
+        return { ...prev, y: prev.y + 1 };
+      });
+    }, 1000);
+    return () => clearInterval(interval); // クリーンアップ関数でタイマーをクリア
+  }, []);
+
 
   return (
     <main className="min-h-screen p-12">
