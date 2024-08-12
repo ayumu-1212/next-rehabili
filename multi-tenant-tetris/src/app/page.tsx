@@ -28,25 +28,29 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (addressRef.current.y >= HEIGHT - 1 || placedBlocksRef.current[addressRef.current.y + 1][addressRef.current.x]) {
-        setPlacedBlocks((prev) => {
-          const newBlocks = prev.map((row, y) => {
-            return row.map((block, x) => {
-              if (x == addressRef.current.x && y == addressRef.current.y) {
-                return true;
-              }
-              return block;
+        if (addressRef.current.y == HEIGHT - 1 && placedBlocksRef.current[HEIGHT - 1].every((v, i) => i == addressRef.current.x ? true : v)) {
+          const newBlocks = [Array.from({ length: WIDTH }, () => false), ...placedBlocksRef.current.slice(0, HEIGHT - 1)];
+          setPlacedBlocks(newBlocks);
+        } else {
+          setPlacedBlocks((prev) => {
+            return prev.map((row, y) => {
+              return row.map((block, x) => {
+                if (x == addressRef.current.x && y == addressRef.current.y) {
+                  return true;
+                }
+                return block;
+              });
             });
           });
-          return newBlocks;
-        });
+        }
       }
       setAddress((prev) => {
         if (prev.y >= HEIGHT - 1 || placedBlocksRef.current[prev.y + 1][prev.x]) {
-          return { ...prev, y: 0 };
+          return { x: 4, y: 0 };
         }
         return { ...prev, y: prev.y + 1 };
       });
-    }, 300);
+    }, 100);
     return () => clearInterval(interval); // クリーンアップ関数でタイマーをクリア
   }, []);
 
