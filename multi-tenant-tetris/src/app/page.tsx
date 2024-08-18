@@ -6,7 +6,7 @@ import { SP } from "next/dist/shared/lib/utils";
 const HEIGHT = 20;
 const WIDTH = 10;
 
-const SPEED = 500;
+const SPEED = 100;
 
 type Address = {
   x: number;
@@ -31,6 +31,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (addressRef.current.y >= HEIGHT - 1 || placedBlocksRef.current[addressRef.current.y + 1][addressRef.current.x]) {
+        // もしブロックが一列揃ったら消す
         if (addressRef.current.y == HEIGHT - 1 && placedBlocksRef.current[HEIGHT - 1].every((v, i) => i == addressRef.current.x ? true : v)) {
           const newBlocks = [Array.from({ length: WIDTH }, () => false), ...placedBlocksRef.current.slice(0, HEIGHT - 1)];
           setPlacedBlocks(newBlocks);
@@ -46,6 +47,10 @@ export default function Home() {
             });
           });
         }
+        // ゲームオーバー処理
+        if (addressRef.current.x == 4 && addressRef.current.y == 0) {
+          clearInterval(interval);
+        }
       }
       setAddress((prev) => {
         if (prev.y >= HEIGHT - 1 || placedBlocksRef.current[prev.y + 1][prev.x]) {
@@ -53,8 +58,9 @@ export default function Home() {
         }
         return { ...prev, y: prev.y + 1 };
       });
+      console.log('intervaling');
     }, SPEED);
-    return () => clearInterval(interval); // クリーンアップ関数でタイマーをクリア
+    return () => clearInterval(interval);
   }, []);
 
   const keyDownHandler = (e: React.KeyboardEvent<HTMLDivElement>) => {
