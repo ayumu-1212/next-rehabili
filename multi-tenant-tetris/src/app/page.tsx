@@ -1,12 +1,9 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { TetrisField } from "./components/TetrisField";
-import { SP } from "next/dist/shared/lib/utils";
-
-const HEIGHT = 20;
-const WIDTH = 10;
-
-const SPEED = 100;
+import { WIDTH, HEIGHT, SPEED } from "./config"
+import { newKeyDownHandler } from "./functions/keyDownHandler";
+import { newStartGameHandler } from "./functions/startGameHandler";
 
 type Address = {
   x: number;
@@ -15,12 +12,10 @@ type Address = {
 
 export default function Home() {
   const [address, setAddress] = useState<Address>({ x: 4, y: -1 });
-  const [placedBlocks, setPlacedBlocks] = useState<Boolean[][]>(Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => false)));
+  const [placedBlocks, setPlacedBlocks] = useState<boolean[][]>(Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => false)));
   const [isGameOver, setIsGameOver] = useState(false);
-
   const addressRef = useRef(address);
   const placedBlocksRef = useRef(placedBlocks);
-
   useEffect(() => {
     addressRef.current = address;
   }, [address]);
@@ -28,65 +23,8 @@ export default function Home() {
     placedBlocksRef.current = placedBlocks;
   }, [placedBlocks]);
 
-  const startGameHandler = () => {
-    setAddress({ x: 4, y: 0 });
-    const interval = setInterval(() => {
-      if (addressRef.current.y >= HEIGHT - 1 || placedBlocksRef.current[addressRef.current.y + 1][addressRef.current.x]) {
-        // もしブロックが一列揃ったら消す
-        if (addressRef.current.y == HEIGHT - 1 && placedBlocksRef.current[HEIGHT - 1].every((v, i) => i == addressRef.current.x ? true : v)) {
-          const newBlocks = [Array.from({ length: WIDTH }, () => false), ...placedBlocksRef.current.slice(0, HEIGHT - 1)];
-          setPlacedBlocks(newBlocks);
-        } else {
-          setPlacedBlocks((prev) => {
-            return prev.map((row, y) => {
-              return row.map((block, x) => {
-                if (x == addressRef.current.x && y == addressRef.current.y) {
-                  return true;
-                }
-                return block;
-              });
-            });
-          });
-        }
-        // 
-        if (addressRef.current.x == 4 && addressRef.current.y == 0) {
-          setIsGameOver(true);
-          clearInterval(interval);
-        }
-      }
-      setAddress((prev) => {
-        if (prev.y >= HEIGHT - 1 || placedBlocksRef.current[prev.y + 1][prev.x]) {
-          return { x: 4, y: 0 };
-        }
-        return { ...prev, y: prev.y + 1 };
-      });
-    }, SPEED);
-  };
-
-  const keyDownHandler = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const key = e.code;
-
-    if (key === 'ArrowUp') {
-      console.log('key is ArrowUp');
-    }
-
-    if (key === 'ArrowDown') {
-      console.log('key is ArrowDown');
-    }
-
-    if (key === 'ArrowLeft') {
-      setAddress((address) =>
-        address.x > 0 && !placedBlocksRef.current[address.y][address.x - 1] ? { ...address, x: address.x - 1 } : address
-      );
-    }
-
-    if (key === 'ArrowRight') {
-      setAddress((address) =>
-        address.x < WIDTH - 1 && !placedBlocksRef.current[address.y][address.x + 1] ? { ...address, x: address.x + 1 } : address
-      );
-    }
-  }
-
+  const keyDownHandler = newKeyDownHandler({ setAddress, placedBlocksRef });
+  const startGameHandler = newStartGameHandler({ setAddress, setPlacedBlocks, setIsGameOver, addressRef, placedBlocksRef });
   const existBlocks = placedBlocksRef.current.map(v => v.map(v2 => v2));
   if (addressRef.current.y >= 0) {
     existBlocks[addressRef.current.y][addressRef.current.x] = true;

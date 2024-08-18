@@ -1,7 +1,6 @@
-
 type Props = {
-  existBlocks: Boolean[][];
-  isGameOver: Boolean;
+  existBlocks: boolean[][];
+  isGameOver: boolean;
 }
 
 export const TetrisField = ({ existBlocks, isGameOver }: Props) => {
