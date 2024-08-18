@@ -14,7 +14,7 @@ type Address = {
 }
 
 export default function Home() {
-  const [address, setAddress] = useState<Address>({ x: 4, y: 0 });
+  const [address, setAddress] = useState<Address>({ x: 4, y: -1 });
   const [placedBlocks, setPlacedBlocks] = useState<Boolean[][]>(Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => false)));
   const [isGameOver, setIsGameOver] = useState(false);
 
@@ -26,10 +26,10 @@ export default function Home() {
   }, [address]);
   useEffect(() => {
     placedBlocksRef.current = placedBlocks;
-    console.log(placedBlocksRef.current);
   }, [placedBlocks]);
 
-  useEffect(() => {
+  const startGameHandler = () => {
+    setAddress({ x: 4, y: 0 });
     const interval = setInterval(() => {
       if (addressRef.current.y >= HEIGHT - 1 || placedBlocksRef.current[addressRef.current.y + 1][addressRef.current.x]) {
         // もしブロックが一列揃ったら消す
@@ -60,10 +60,8 @@ export default function Home() {
         }
         return { ...prev, y: prev.y + 1 };
       });
-      console.log('intervaling');
     }, SPEED);
-    return () => clearInterval(interval);
-  }, []);
+  };
 
   const keyDownHandler = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const key = e.code;
@@ -90,12 +88,17 @@ export default function Home() {
   }
 
   const existBlocks = placedBlocksRef.current.map(v => v.map(v2 => v2));
-  existBlocks[addressRef.current.y][addressRef.current.x] = true;
+  if (addressRef.current.y >= 0) {
+    existBlocks[addressRef.current.y][addressRef.current.x] = true;
+  }
 
   return (
     <main className="min-h-screen p-12">
       <div className="p-12 w-full flex justify-center" tabIndex={0} onKeyDown={keyDownHandler}>
         <TetrisField existBlocks={existBlocks} isGameOver={isGameOver} />
+      </div>
+      <div className="flex justify-center">
+        <button className="bg-[#4881C6] text-white p-2 rounded" onClick={startGameHandler}>Start</button>
       </div>
     </main>
   );
