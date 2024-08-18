@@ -1,9 +1,12 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { TetrisField } from "./components/TetrisField";
+import { SP } from "next/dist/shared/lib/utils";
 
 const HEIGHT = 20;
 const WIDTH = 10;
+
+const SPEED = 500;
 
 type Address = {
   x: number;
@@ -50,7 +53,7 @@ export default function Home() {
         }
         return { ...prev, y: prev.y + 1 };
       });
-    }, 100);
+    }, SPEED);
     return () => clearInterval(interval); // クリーンアップ関数でタイマーをクリア
   }, []);
 
