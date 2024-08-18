@@ -16,6 +16,7 @@ type Address = {
 export default function Home() {
   const [address, setAddress] = useState<Address>({ x: 4, y: 0 });
   const [placedBlocks, setPlacedBlocks] = useState<Boolean[][]>(Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => false)));
+  const [isGameOver, setIsGameOver] = useState(false);
 
   const addressRef = useRef(address);
   const placedBlocksRef = useRef(placedBlocks);
@@ -47,8 +48,9 @@ export default function Home() {
             });
           });
         }
-        // ゲームオーバー処理
+        // 
         if (addressRef.current.x == 4 && addressRef.current.y == 0) {
+          setIsGameOver(true);
           clearInterval(interval);
         }
       }
@@ -93,7 +95,7 @@ export default function Home() {
   return (
     <main className="min-h-screen p-12">
       <div className="p-12 w-full flex justify-center" tabIndex={0} onKeyDown={keyDownHandler}>
-        {TetrisField(existBlocks)}
+        <TetrisField existBlocks={existBlocks} isGameOver={isGameOver} />
       </div>
     </main>
   );
